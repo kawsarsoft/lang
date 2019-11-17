@@ -11,6 +11,7 @@ export default class Lang {
     this.spa = false
     this.output = ''
     this.outputs = ''
+    this.thename = ''
   }
   setLocale(data){
     return this.locale = data
@@ -29,33 +30,35 @@ export default class Lang {
   setMessage(data){
     return this.messages = data
   }
-  getMessage(data){
+  getMessage(){
     return this.messages
   }
 
   setLocaleMessage(data){
-    return this.fallbackMessage = data
+    return this.localeMessage = data
   }
-  getLocaleMessage(data){
-    return this.fallbackMessage
+  getLocaleMessage(){
+    return this.localeMessage
   }
 
   setFallMessage(data){
     return this.fallbackMessage = data
   }
-  getFallMessage(data){
+  getFallMessage(){
     return this.fallbackMessage
   }
 
   spaApp(){
       this.spa = true;
   }
+
   trans(data,replacement={}) {
       if (this.spa) {
           this.output = this.getLocaleMessage()[data]
       } else {
           this.output = this.getMessage()[this.locale][data]
       }
+
       if(this.spa){
           if (this.output === undefined) {
             this.outputs = this.fallbackMessage[data]
@@ -71,14 +74,28 @@ export default class Lang {
             this.outputs = this.output
           }
       }
+
       if(this.outputs !== undefined) {
           let replaceKey = Object.keys(replacement)
           let replaceValue = Object.values(replacement)
           replaceKey.forEach ((name,index) => {
-                  this.outputs = this.outputs.replace(`:${name}`,replaceValue[index])
+
+              if (this.spa) {
+                  if(this.getLocaleMessage()[`__p__${name}`] !== undefined){
+                      // parameter
+                      this.outputs = this.outputs.replace(`:${name}`,this.getMessage()[this.locale][`__p__${name}`])
+                  } else {
+                      this.outputs = this.outputs.replace(`:${name}`,replaceValue[index])
+                  }
+              } else {
+                  if(this.getMessage()[this.locale][`__p__${name}`] !== undefined){
+                      this.outputs = this.outputs.replace(`:${name}`,this.getMessage()[this.locale][`__p__${name}`])
+                  } else {
+                       this.outputs = this.outputs.replace(`:${name}`,replaceValue[index])
+                  }
+              }
           })
       }
-
     return  this.outputs
   }
 }
