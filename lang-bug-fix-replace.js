@@ -12,6 +12,8 @@ export default class Lang {
     this.output = ''
     this.outputs = ''
     this.thename = ''
+    this.lists = []
+    this.isFallParameter = false
   }
   setLocale(data){
     return this.locale = data
@@ -52,6 +54,20 @@ export default class Lang {
       this.spa = true;
   }
 
+  setLangLists(data=[]){
+      this.lists = data
+  }
+
+  getLangLists()
+  {
+      return this.lists
+  }
+
+  fallParameter()
+  {
+      this.isFallParameter = true;
+  }
+
   trans(data,replacement={}) {
       if (this.spa) {
           this.output = this.getLocaleMessage()[data]
@@ -63,7 +79,7 @@ export default class Lang {
           if (this.output === undefined) {
             this.outputs = this.fallbackMessage[data]
           }  else {
-            this.outputs = output
+            this.outputs = this.output
           }
       }else{
           if (this.output === undefined && this.fallbackMessage === undefined) {
@@ -83,9 +99,13 @@ export default class Lang {
               if (this.spa) {
                   if(this.getLocaleMessage()[`__p__${name}`] !== undefined){
                       // parameter
-                      this.outputs = this.outputs.replace(`:${name}`,this.getMessage()[this.locale][`__p__${name}`])
-                  } else {
-                      this.outputs = this.outputs.replace(`:${name}`,replaceValue[index])
+                      this.outputs = this.outputs.replace(`:${name}`,this.getLocaleMessage()[`__p__${name}`])
+                  }  else {
+                      if(this.isFallParameter && this.getFallMessage()[`__p__${name}`] !== undefined){
+                        this.outputs = this.outputs.replace(`:${name}`,this.getFallMessage()[`__p__${name}`])
+                    }else {
+                        this.outputs = this.outputs.replace(`:${name}`,replaceValue[index])
+                    }
                   }
               } else {
                   if(this.getMessage()[this.locale][`__p__${name}`] !== undefined){
